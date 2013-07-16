@@ -57,6 +57,10 @@ public class AreaItem {
 			detectArea(detectX, detectY, detectX, detectY + 1, gridColor);
 			detectArea(detectX, detectY, detectX + 1, detectY, gridColor);
 			detectArea(detectX, detectY, detectX - 1, detectY, gridColor);
+			detectArea(detectX, detectY, detectX, detectY - 2, gridColor);
+			detectArea(detectX, detectY, detectX, detectY + 2, gridColor);
+			detectArea(detectX, detectY, detectX + 2, detectY, gridColor);
+			detectArea(detectX, detectY, detectX - 2, detectY, gridColor);
 		}
 
 	}

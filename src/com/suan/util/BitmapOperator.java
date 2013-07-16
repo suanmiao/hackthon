@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class BitmapOperator {
 
-	public static int colorRadius = 1500;
+	public static int colorRadius = 1000;
 	private static int minAreaWith = 30;
 	private static int minAreaHeight = 30;
 	private static int xDivision = 5;
@@ -20,7 +20,7 @@ public class BitmapOperator {
 	public static int[][] gridColor;
 	private static ReconitionManager reconitionManager;
 	private static int[] colors;
-	ThreadPool threadPool;
+	private static ThreadPool threadPool;
 	private int nowTaskId = 0;
 	private long lastTime;
 
@@ -28,14 +28,18 @@ public class BitmapOperator {
 		gridColor = new int[xAmount][yAmount];
 
 		reconitionManager = new ReconitionManager();
-		threadPool = new ThreadPool(3);
+		threadPool = new ThreadPool(1);
+	}
+
+	public static void onStop() {
+		threadPool.closePool();
 	}
 
 	public void doCalculate(byte[] data, Camera camera) {
 		lastTime = System.currentTimeMillis();
 		colors = convertTointArray(data, camera);
 
-//		Log.e("time", "" + (System.currentTimeMillis() - lastTime));
+		// Log.e("time", "" + (System.currentTimeMillis() - lastTime));
 		threadPool.execute(createTask(nowTaskId++));
 
 		// if (nowTaskId / 2 == 0) {
@@ -57,19 +61,19 @@ public class BitmapOperator {
 			public void run() {
 				mGridColor = new int[xAmount][yAmount];
 				long time = System.currentTimeMillis();
-				
+
 				initGridColor();
-//				Log.e("time", ""+(System.currentTimeMillis()-time));
+//				Log.e("time", "" + (System.currentTimeMillis() - time));
 				long time1 = System.currentTimeMillis();
 				gridColor = mGridColor;
 
 				reconitionManager.recoginse(mGridColor);
-//				Log.e("time1", ""+(System.currentTimeMillis()-time1));
+//				Log.e("time1", "" + (System.currentTimeMillis() - time1));
 
 			}
 
 			private void initGridColor() {
-//				long time = System.currentTimeMillis();
+				// long time = System.currentTimeMillis();
 				int xLength = width / xAmount;
 				int yLength = height / yAmount;
 				for (int x = 0; x < xAmount; x++) {
@@ -82,14 +86,13 @@ public class BitmapOperator {
 										* width + x * xLength + i];
 							}
 						}
-						
 
 						mGridColor[x][y] = getAreaColor(pixelMatrix);
 
 					}
 
 				}
-//				Log.e("time", ""+(System.currentTimeMillis()-time));
+				// Log.e("time", ""+(System.currentTimeMillis()-time));
 
 			}
 
@@ -99,6 +102,8 @@ public class BitmapOperator {
 	public int[] convertTointArray(byte[] data, Camera camera) {
 		height = camera.getParameters().getPreviewSize().height;
 		width = camera.getParameters().getPreviewSize().width;
+//		Log.e("size", width + "|" + height);
+
 
 		int[] argb8888 = new int[height * width];
 
@@ -204,50 +209,52 @@ public class BitmapOperator {
 		//
 		// return Color.argb((int) average0, (int) average1, (int) average2,
 		// (int) average3);
-
-		ArrayList<int[]> colorArrayList = new ArrayList<int[]>();
+		int[][] colorArray = new int[100][2];
+		int amount = 0;
 		for (int x = 0; x < minArea.length; x += 4) {
 			for (int y = 0; y < minArea[0].length; y += 4) {
-				int index = exist(minArea[x][y], colorArrayList);
+				int index = exist(minArea[x][y], colorArray, amount);
 				if (index == -1) {
 
-					colorArrayList.add(new int[] { minArea[x][y], 1 });
+					colorArray[amount][0] = minArea[x][y];
+					colorArray[amount][1] = 1;
+					amount++;
 				} else {
 
 					int average0 = (int) (Color.alpha(minArea[x][y]) + Color
-							.alpha(colorArrayList.get(index)[0])) / 2;
+							.alpha(colorArray[index][0])) / 2;
 					int average1 = (int) (Color.red(minArea[x][y]) + Color
-							.red(colorArrayList.get(index)[0])) / 2;
+							.red(colorArray[index][0])) / 2;
 					int average2 = (int) (Color.green(minArea[x][y]) + Color
-							.green(colorArrayList.get(index)[0])) / 2;
+							.green(colorArray[index][0])) / 2;
 					int average3 = (int) (Color.blue(minArea[x][y]) + Color
-							.blue(colorArrayList.get(index)[0])) / 2;
+							.blue(colorArray[index][0])) / 2;
 
 					int averageColor = Color.argb(average0, average1, average2,
 							average3);
-
-					colorArrayList.set(index, new int[] { averageColor,
-							colorArrayList.get(index)[1] + 1 });
+					int lastTime = colorArray[index][1];
+					colorArray[index][0] = averageColor;
+					colorArray[index][1] = lastTime + 1;
 				}
 			}
 		}
-
+		// Log.e("amount", total+"");
 		int maxIndex = 0;
-		for (int i = 0; i < colorArrayList.size(); i++) {
-			if (colorArrayList.get(maxIndex)[1] <= colorArrayList.get(i)[1]) {
+		for (int i = 0; i < amount; i++) {
+			if (colorArray[maxIndex][1] <= colorArray[i][1]) {
 				maxIndex = i;
 			}
 		}
 
-		return colorArrayList.get(maxIndex)[0];
+		return colorArray[maxIndex][0];
 
 	}
 
-	private static int exist(int a, ArrayList<int[]> list) {
+	private static int exist(int a, int[][] array, int length) {
 		int index = -1;
 
-		for (int i = 0; i < list.size(); i++) {
-			if (colorSimilar(a, list.get(i)[0],colorRadius)) {
+		for (int i = 0; i < length; i++) {
+			if (colorSimilar(a, array[i][0], colorRadius)) {
 				return i;
 			}
 		}
@@ -255,15 +262,12 @@ public class BitmapOperator {
 		return index;
 	}
 
-	public static boolean colorSimilar(int a, int b,int colorRadius) {
-		return Math.abs(Color.alpha(a) - Color.alpha(b))
-				* Math.abs(Color.alpha(a) - Color.alpha(b))
-				+ Math.abs(Color.red(a) - Color.red(b))
-				* Math.abs(Color.red(a) - Color.red(b))
-				+ Math.abs(Color.green(a) - Color.green(b))
-				* Math.abs(Color.green(a) - Color.green(b))
-				+ Math.abs(Color.blue(a) - Color.blue(b))
-				* Math.abs(Color.blue(a) - Color.blue(b)) <= colorRadius;
+	public static boolean colorSimilar(int a, int b, int colorRadius) {
+		int al = Math.abs(Color.alpha(a) - Color.alpha(b));
+		int r = Math.abs(Color.red(a) - Color.red(b));
+		int g = Math.abs(Color.green(a) - Color.green(b));
+		int bl = Math.abs(Color.blue(a) - Color.blue(b));
+		return al * al + r * r + g * g + bl * bl <= colorRadius;
 	}
 
 	public void decodeYUV(int[] out, byte[] fg, int width, int height)

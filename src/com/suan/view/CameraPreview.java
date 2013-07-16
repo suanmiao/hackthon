@@ -3,6 +3,7 @@ package com.suan.view;
 import java.io.IOException;
 import java.util.List;
 
+import com.suan.util.BitmapOperator;
 import com.suan.util.PreviewBitmapCallBack;
 
 import android.app.Activity;
@@ -118,7 +119,7 @@ public class CameraPreview extends SurfaceView implements
 			// if-statement.
 			if (!mSurfaceConfiguring) {
 
-				Log.e("size", width + "|" + height);
+//				Log.e("size", width + "|" + height);
 
 				Camera.Size previewSize = determinePreviewSize(portrait, width,
 						height);
@@ -147,7 +148,6 @@ public class CameraPreview extends SurfaceView implements
 					return;
 				}
 			}
-
 			configureCameraParameters(cameraParams, portrait);
 			mSurfaceConfiguring = false;
 
@@ -369,6 +369,7 @@ public class CameraPreview extends SurfaceView implements
 		}
 
 		cameraParams.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+//		cameraParams.setPreviewFrameRate(2);
 		cameraParams.setPictureSize(mPictureSize.width, mPictureSize.height);
 		if (DEBUGGING) {
 			Log.v(LOG_TAG, "Preview Actual Size - w: " + mPreviewSize.width
@@ -389,6 +390,7 @@ public class CameraPreview extends SurfaceView implements
 		if (null == mCamera) {
 			return;
 		}
+		BitmapOperator.onStop();
 		mCamera.stopPreview();
 		mCamera.setPreviewCallback(null);
 		mCamera.release();

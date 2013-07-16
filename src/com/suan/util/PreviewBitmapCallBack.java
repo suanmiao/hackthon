@@ -15,6 +15,10 @@ public class PreviewBitmapCallBack implements PreviewCallback {
 		}else{
 			bitmapOperator.doCalculate(data, camera);
 		}
+		
 	}
+	
+	
+	
 
 }
