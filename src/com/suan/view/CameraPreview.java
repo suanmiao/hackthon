@@ -3,10 +3,6 @@ package com.suan.view;
 import java.io.IOException;
 import java.util.List;
 
-import com.suan.util.BitmapOperator;
-import com.suan.util.PreviewBitmapCallBack;
-
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -22,6 +18,9 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import com.suan.util.BitmapOperator;
+import com.suan.util.PreviewBitmapCallBack;
 
 /**
  * This class assumes the parent layout is RelativeLayout.LayoutParams.

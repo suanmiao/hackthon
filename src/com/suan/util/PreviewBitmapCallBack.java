@@ -2,7 +2,6 @@ package com.suan.util;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
-import android.util.Log;
 
 public class PreviewBitmapCallBack implements PreviewCallback {
 	BitmapOperator bitmapOperator;

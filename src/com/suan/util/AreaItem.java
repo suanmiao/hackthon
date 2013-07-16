@@ -27,8 +27,8 @@ public class AreaItem {
 		record();
 
 	}
-	
-	public int getColor(){
+
+	public int getColor() {
 		return gridColor[x][y];
 	}
 
@@ -41,7 +41,7 @@ public class AreaItem {
 					(int) (BitmapOperator.colorRadius * 2))
 					&& BitmapOperator.colorSimilar(gridColor[startX][startY],
 							gridColor[detectX][detectY],
-							(int) (BitmapOperator.colorRadius*1.5))) {
+							(int) (BitmapOperator.colorRadius * 1.5))) {
 				if (exist(detectX, detectY)) {
 					return;
 				} else {
@@ -97,6 +97,92 @@ public class AreaItem {
 
 		}
 
+		// about xRecord
+
+		// after resort:0:max
+
+		int xMaxTime = xRecord.get(0)[1];
+		int xMinTime = xRecord.get(0)[1];
+		for (int i = 0; i < xRecord.size(); i++) {
+			for (int j = i; j < xRecord.size() - 1; j++) {
+				if (xRecord.get(j)[0] < xRecord.get(j + 1)[0]) {
+					// replace
+					int[] temp = xRecord.get(j + 1);
+					xRecord.set(j + 1, xRecord.get(j));
+					xRecord.set(j, temp);
+				} else {
+
+				}
+			}
+			if (xRecord.get(i)[1] < xMinTime) {
+				xMinTime = xRecord.get(i)[1];
+			}
+
+			if (xRecord.get(i)[1] > xMaxTime) {
+				xMaxTime = xRecord.get(i)[1];
+			}
+
+		}
+		// border clip
+		if (xRecord.size() > 4) {
+			for (int i = 0; i < xRecord.size() / 3; i++) {
+				if (xRecord.get(0)[0] < xMaxTime / 5) {
+					xRecord.remove(0);
+				}
+
+			}
+			for (int i = 0; i < xRecord.size() / 3; i++) {
+				if (xRecord.get(xRecord.size() - 1)[0] < xMaxTime / 5) {
+					xRecord.remove(xRecord.size() - 1);
+				}
+
+			}
+
+		}
+
+		// about yRecord
+
+		// after resort:0:max
+
+		int yMaxTime = yRecord.get(0)[1];
+		int yMinTime = yRecord.get(0)[1];
+		for (int i = 0; i < yRecord.size(); i++) {
+			for (int j = i; j < yRecord.size() - 1; j++) {
+				if (yRecord.get(j)[0] < yRecord.get(j + 1)[0]) {
+					// replace
+					int[] temp = yRecord.get(j + 1);
+					yRecord.set(j + 1, yRecord.get(j));
+					yRecord.set(j, temp);
+				} else {
+
+				}
+			}
+			if (yRecord.get(i)[1] < yMinTime) {
+				yMinTime = yRecord.get(i)[1];
+			}
+
+			if (yRecord.get(i)[1] > yMaxTime) {
+				yMaxTime = yRecord.get(i)[1];
+			}
+
+		}
+		// border clip
+		if (yRecord.size() > 4) {
+			for (int i = 0; i < yRecord.size() / 3; i++) {
+				if (yRecord.get(0)[0] < yMaxTime / 5) {
+					yRecord.remove(0);
+				}
+
+			}
+			for (int i = 0; i < yRecord.size() / 3; i++) {
+				if (yRecord.get(yRecord.size() - 1)[0] < yMaxTime / 5) {
+					yRecord.remove(yRecord.size() - 1);
+				}
+
+			}
+
+		}
+
 	}
 
 	private int xExist(int x) {
@@ -124,98 +210,81 @@ public class AreaItem {
 	}
 
 	public int getAreaWidth() {
-		if (xRecord.size() == 0) {
-			return 0;
-		}
-		int maxTime = xRecord.get(0)[1];
-		int minTime = xRecord.get(0)[1];
-		for (int i = 0; i < xRecord.size(); i++) {
-			for (int j = i; j < xRecord.size() - 1; j++) {
-				if (xRecord.get(j)[0] < xRecord.get(j + 1)[0]) {
-					// replace
-					int[] temp = xRecord.get(j + 1);
-					xRecord.set(j + 1, xRecord.get(j));
-					xRecord.set(j, temp);
-				} else {
-
-				}
-			}
-			if (xRecord.get(i)[1] < minTime) {
-				minTime = xRecord.get(i)[1];
-			}
-
-			if (xRecord.get(i)[1] > maxTime) {
-				maxTime = xRecord.get(i)[1];
-			}
-
-		}
-		// border clip
-		if (xRecord.size() > 4) {
-			for (int i = 0; i < xRecord.size() / 3; i++) {
-				if (xRecord.get(0)[0] < maxTime / 5) {
-					xRecord.remove(0);
-				}
-
-			}
-			for (int i = 0; i < xRecord.size() / 3; i++) {
-				if (xRecord.get(xRecord.size() - 1)[0] < maxTime / 5) {
-					xRecord.remove(xRecord.size() - 1);
-				}
-
-			}
-
-		}
 
 		return xRecord.size();
 	}
 
 	public int getAreaHeight() {
 
-		if (yRecord.size() == 0) {
-			return 0;
-		}
-
-		int maxTime = yRecord.get(0)[1];
-		int minTime = yRecord.get(0)[1];
-		for (int i = 0; i < yRecord.size(); i++) {
-			for (int j = i; j < yRecord.size() - 1; j++) {
-				if (yRecord.get(j)[0] < yRecord.get(j + 1)[0]) {
-					// replace
-					int[] temp = yRecord.get(j + 1);
-					yRecord.set(j + 1, yRecord.get(j));
-					yRecord.set(j, temp);
-				} else {
-
-				}
-			}
-			if (yRecord.get(i)[1] < minTime) {
-				minTime = yRecord.get(i)[1];
-			}
-
-			if (yRecord.get(i)[1] > maxTime) {
-				maxTime = yRecord.get(i)[1];
-			}
-
-		}
-		// border clip
-		if (yRecord.size() > 4) {
-			for (int i = 0; i < yRecord.size() / 3; i++) {
-				if (yRecord.get(0)[0] < maxTime / 5) {
-					yRecord.remove(0);
-				}
-
-			}
-			for (int i = 0; i < yRecord.size() / 3; i++) {
-				if (yRecord.get(yRecord.size() - 1)[0] < maxTime / 5) {
-					yRecord.remove(yRecord.size() - 1);
-				}
-
-			}
-
-		}
-
 		return yRecord.size();
 
 	}
 
+	public int getRightBorder() {
+		if (xRecord.size() == 0) {
+			return x;
+		}
+
+		return xRecord.get(0)[0];
+	}
+
+	public int getLeftBorder() {
+		if (xRecord.size() == 0) {
+			return x;
+		}
+
+		return xRecord.get(xRecord.size() - 1)[0];
+	}
+
+	public int getTopBorder() {
+		if (yRecord.size() == 0) {
+			return y;
+		}
+		return yRecord.get(yRecord.size() - 2)[0];
+
+	}
+
+	public int getBottomBorder() {
+		if (yRecord.size() == 0) {
+			return y;
+		}
+		return yRecord.get(0)[0];
+
+	}
+
+	public boolean contain(int x, int y) {
+		if (x < getLeftBorder() || x > getTopBorder() || y < getTopBorder()
+				|| y > getBottomBorder()) {
+			return false;
+		} else {
+			boolean contain = false;
+			for (int i = 0; i < blockArrayList.size(); i++) {
+				if (blockArrayList.get(i)[0] == x
+						&& blockArrayList.get(i)[1] == y) {
+					contain = true;
+				}
+			}
+			return contain;
+		}
+
+	}
+
+	public boolean contain(AreaItem areaItem) {
+		if (areaItem.getLeftBorder() < getLeftBorder()
+				|| areaItem.getRightBorder() > getRightBorder()
+				|| areaItem.getTopBorder() < getTopBorder()
+				|| areaItem.getBottomBorder() > getBottomBorder()) {
+			return false;
+		}else{
+			if(areaItem.getLeftBorder() >= getLeftBorder()
+					&& areaItem.getRightBorder() <= getRightBorder()
+					&& areaItem.getTopBorder() >= getTopBorder()
+					&& areaItem.getBottomBorder() <= getBottomBorder()){
+				return true;
+			}else {
+				return false;
+			}
+		}
+
+	}
 }

@@ -1,7 +1,5 @@
 package com.suan.util;
 
-import android.graphics.Color;
-import android.util.Log;
 
 public class ReconitionManager {
 	public int[][] gridColor;
@@ -14,13 +12,19 @@ public class ReconitionManager {
 	public static int centerY = 9;
 	private int centerAreaSize = 0;
 	public static AreaItem centerAreaItem;
+	private FrameManager frameManager;
 	/*
 	 * 0:color 1:size 2:height 3:width 4:record time
 	 */
-	private Line centerRecord = new Line(25);
 
+	public ReconitionManager(){
+		frameManager = new FrameManager();
+		
+	}
+	
 	public void recoginse(int[][] gridColor) {
 		this.gridColor = gridColor;
+		frameManager.addFrame(gridColor);
 		
 		switch (nowRecogState) {
 		case -1:
@@ -28,24 +32,9 @@ public class ReconitionManager {
 			/*
 			 * size >90 ->save
 			 */
-			centerRecord.resort();
-			centerAreaItem = new AreaItem(centerX, centerY, gridColor);
-			centerAreaSize = centerAreaItem.getAreaSize();
-			if (centerAreaSize > 90) {
-				// if area size >90 and not the same as top color
-				if (centerRecord.getTop() == null
-						|| !BitmapOperator.colorSimilar(
-								(int)centerRecord.getTop()[0],
-								centerAreaItem.getColor(),
-								(int) (BitmapOperator.colorRadius * 1.5))) {
-
-					centerRecord.push(new long[] { gridColor[centerX][centerY],
-							centerAreaSize, centerAreaItem.getAreaHeight(),
-							centerAreaItem.getAreaWidth(),System.currentTimeMillis() });
-
-				}
-
-			}
+			
+//			centerAreaItem = new AreaItem(centerX, centerY, gridColor);
+//			centerAreaSize = centerAreaItem.getAreaSize();
 
 			// Log.e("centerSize",
 			// centerAreaSize + "|" + centerAreaItem.getAreaHeight() + "|"
@@ -53,10 +42,8 @@ public class ReconitionManager {
 
 			switch (handRecogState) {
 			case -1:
-				Log.e("size", centerRecord.content.size() + "");
-				if (centerRecord.getTop()[1] > 10) {
 
-				}
+				
 				break;
 
 			case 0:
@@ -87,4 +74,7 @@ public class ReconitionManager {
 
 	}
 
+	
+	
+	
 }

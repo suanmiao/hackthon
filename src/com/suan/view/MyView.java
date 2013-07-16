@@ -1,21 +1,20 @@
 package com.suan.view;
 
-import java.util.Queue;
+import java.util.ArrayList;
 
-import android.R.integer;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
+import android.hardware.Camera.Area;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
+import com.suan.util.AreaItem;
 import com.suan.util.BitmapOperator;
 import com.suan.util.ReconitionManager;
 
@@ -25,6 +24,7 @@ public class MyView extends View {
 	/*
 	 * draw mode 0:sketch 1:draw line 2:draw circle 3:draw rectangle
 	 */
+	public static ArrayList<AreaItem> nowAreaItems = null;
 
 	private Paint paint = null;
 
@@ -95,6 +95,29 @@ public class MyView extends View {
 		}
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(3);
+
+		if (nowAreaItems != null) {
+			try {
+				for (int i = 0; i < nowAreaItems.size(); i++) {
+					AreaItem nowAreaItem = nowAreaItems.get(i);
+
+					for (int j = 0; j < nowAreaItem.blockArrayList.size(); j++) {
+						int x = nowAreaItem.blockArrayList.get(j)[0];
+						int y = nowAreaItem.blockArrayList.get(j)[1];
+						int color = nowAreaItem.blockArrayList.get(j)[2];
+						paint.setColor(color);
+						canvas.drawRect(x * xWidth, y * yWidth, x * xWidth
+								+ xWidth, y * yWidth + yWidth, paint);
+
+					}
+
+				}
+
+			} catch (Exception exception) {
+
+			}
+		}
+
 		if (ReconitionManager.centerAreaItem != null) {
 			for (int i = 0; i < ReconitionManager.centerAreaItem.blockArrayList
 					.size(); i++) {

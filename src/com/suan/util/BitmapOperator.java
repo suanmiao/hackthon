@@ -1,7 +1,5 @@
 package com.suan.util;
 
-import java.util.ArrayList;
-
 import android.graphics.Color;
 import android.hardware.Camera;
 import android.util.Log;
@@ -15,8 +13,8 @@ public class BitmapOperator {
 	private static int yDivision = 5;
 	private static int height, width;
 
-	private static int xAmount = 30;
-	private static int yAmount = 18;
+	public static int xAmount = 30;
+	public static int yAmount = 18;
 	public static int[][] gridColor;
 	private static ReconitionManager reconitionManager;
 	private static int[] colors;
@@ -63,12 +61,12 @@ public class BitmapOperator {
 				long time = System.currentTimeMillis();
 
 				initGridColor();
-//				Log.e("time", "" + (System.currentTimeMillis() - time));
+				Log.e("initGridtime", "" + (System.currentTimeMillis() - time));
 				long time1 = System.currentTimeMillis();
 				gridColor = mGridColor;
 
 				reconitionManager.recoginse(mGridColor);
-//				Log.e("time1", "" + (System.currentTimeMillis() - time1));
+				Log.e("recotionTime", "" + (System.currentTimeMillis() - time1));
 
 			}
 
@@ -104,10 +102,12 @@ public class BitmapOperator {
 		width = camera.getParameters().getPreviewSize().width;
 //		Log.e("size", width + "|" + height);
 
+		long time = System.currentTimeMillis();
 
 		int[] argb8888 = new int[height * width];
 
 		decodeYUV(argb8888, data, width, height);
+		Log.e("decodeTime", "" + (System.currentTimeMillis() - time));
 
 		return argb8888;
 
