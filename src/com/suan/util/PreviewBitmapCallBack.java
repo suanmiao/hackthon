@@ -13,7 +13,7 @@ public class PreviewBitmapCallBack implements PreviewCallback {
 		if(bitmapOperator ==null){
 			bitmapOperator = new BitmapOperator();
 		}else{
-			bitmapOperator.convertToBitmap(data, camera);
+			bitmapOperator.doCalculate(data, camera);
 		}
 	}
 
