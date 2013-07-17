@@ -13,14 +13,14 @@ public class ReconitionManager {
 	public static int centerY = 9;
 	private int centerAreaSize = 0;
 	public static AreaItem centerAreaItem;
-	private CopyOfFrameManager frameManager;
+	private FrameManager frameManager;
 
 	/*
 	 * 0:color 1:size 2:height 3:width 4:record time
 	 */
 
 	public ReconitionManager() {
-		frameManager = new CopyOfFrameManager();
+		frameManager = new FrameManager();
 
 	}
 

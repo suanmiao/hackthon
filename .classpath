@@ -4,5 +4,8 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="/home/lhk/workspace/CameraPreview/libs/Baidu-OAuth-SDK-Android-G-2.0.0.jar"/>
+	<classpathentry kind="lib" path="/home/lhk/workspace/CameraPreview/libs/Baidu-PCS-SDK-Android-L2-2.1.0.jar"/>
+	<classpathentry kind="lib" path="/home/lhk/workspace/CameraPreview/libs/httpmime-4.2.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -2,7 +2,7 @@ package com.suan.util.camera;
 
 import java.util.ArrayList;
 
-import com.suan.view.MyView;
+import com.suan.view.MyCameraView;
 
 public class CopyOfFrameManager {
 	private ArrayList<AreaItem[]> objectList = new ArrayList<AreaItem[]>();
@@ -112,7 +112,7 @@ public class CopyOfFrameManager {
 			}
 		}
 
-		MyView.nowAreaItems = clipedAreaItems;
+		MyCameraView.nowAreaItems = clipedAreaItems;
 
 	}
 

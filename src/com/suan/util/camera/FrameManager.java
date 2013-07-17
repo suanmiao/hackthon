@@ -2,153 +2,142 @@ package com.suan.util.camera;
 
 import java.util.ArrayList;
 
-import com.suan.view.MyView;
+import com.suan.view.MyCameraView;
 
+import android.R.integer;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 public class FrameManager {
-	public ArrayList<FrameObjectRecorder> allFrameArrayList = new ArrayList<FrameObjectRecorder>();
-	public ArrayList<AreaItem> movingObjectList = new ArrayList<AreaItem>();
-	public ArrayList<AreaItem[]> similarAreaItems = new ArrayList<AreaItem[]>();
-	private static int maxMovingFootFrame = 8;
-	private static int minMovingFootFrame = 2;
-	private int [] [] gridColor;
-	private int [][]lastGridColor;
+	ArrayList<int[][]> gridArrayList = new ArrayList<int[][]>();
+	private ArrayList<AreaItem> firstAreaItems = new ArrayList<AreaItem>();
+	private ArrayList<AreaItem> secondAreaItems = new ArrayList<AreaItem>();
+	private ArrayList<AreaItem> thirdAreaItems = new ArrayList<AreaItem>();
+	public static ArrayList<long[]> captuerColorList = new ArrayList<long[]>();
+	private static int capturedColor = -1;
+	public static boolean still = false;
+	private int sampleFrame = 7;
 
 	public FrameManager() {
 
 	}
 
 	public void addFrame(int[][] gridColor) {
-		this.gridColor = gridColor;
-		movingObjectList = null;
-		allFrameArrayList.add(new FrameObjectRecorder(gridColor));
-		resort();
-		similarAreaItems = new ArrayList<AreaItem[]>();
-		movingObjectList = new ArrayList<AreaItem>();
+		gridArrayList.add(gridColor);
+		remove();
+		if (gridArrayList.size() > 1) {
+			detectCenter();
 
-		recognise();
-		lastGridColor = gridColor;
+		}
 		// Log.e("moving", movingObjectList.size() + "");
 	}
-	
 
-	
-	
-
-	private void resort() {
-		if (System.currentTimeMillis()
-				- allFrameArrayList.get(0).getFrameBornTime() > 6000) {
-			allFrameArrayList.remove(0);
+	private void remove() {
+		if (gridArrayList.size() > sampleFrame) {
+			gridArrayList.remove(0);
+		}
+		if (firstAreaItems.size() > sampleFrame) {
+			firstAreaItems.remove(0);
+		}
+		if (secondAreaItems.size() > sampleFrame) {
+			secondAreaItems.remove(0);
+		}
+		if (thirdAreaItems.size() > sampleFrame) {
+			thirdAreaItems.remove(0);
+		}
+		if(captuerColorList.size()>0){
+			if(System.currentTimeMillis()-captuerColorList.get(0)[1]>3000){
+				captuerColorList.remove(0);
+			}
 		}
 
 	}
 
-	private void recognise() {
-		if (allFrameArrayList.size() > 1) {
-			FrameObjectRecorder lastFrameObjectRecorder = allFrameArrayList
-					.get(allFrameArrayList.size() - 2);
-			FrameObjectRecorder nowFrameObjectRecorder = allFrameArrayList
-					.get(allFrameArrayList.size() - 1);
-			ArrayList<AreaItem> lastFrameAreaItems = lastFrameObjectRecorder
-					.getFrameObjectRow().objectList;
-			ArrayList<AreaItem> nowFrameAreaItems = nowFrameObjectRecorder
-					.getFrameObjectRow().objectList;
+	private void detectCenter() {
 
-			for (int i = 0; i < nowFrameAreaItems.size(); i++) {
-				AreaItem nowAreaItem = nowFrameAreaItems.get(i);
+		double stillPercent = (double) (detectGrid(ReconitionManager.centerX,
+				ReconitionManager.centerY, firstAreaItems)
+				+ detectGrid(ReconitionManager.centerX + 3,
+						ReconitionManager.centerY, secondAreaItems) + detectGrid(
+				ReconitionManager.centerX - 3, ReconitionManager.centerY,
+				thirdAreaItems)) / 3.0;
 
-				for (int j = 0; j < lastFrameAreaItems.size(); j++) {
-					AreaItem lastAreaItem = lastFrameAreaItems.get(j);
+//		Log.e("perconet", stillPercent + "");
+		// 0.875
+		// 0.812
 
-					// Log.e("differen",
-					// (difference/nowAreaItem.getAreaSize()) + "");
+		if (stillPercent > 0.68) {
+			whenStill();
+		} else {
+			if (still) {
+				AreaItem firstAreaItem = new AreaItem(
+						ReconitionManager.centerX, ReconitionManager.centerY,
+						gridArrayList.get(gridArrayList.size() - 1), 2000);
+				AreaItem secondAreaItem = new AreaItem(
+						ReconitionManager.centerX + 3,
+						ReconitionManager.centerY,
+						gridArrayList.get(gridArrayList.size() - 1), 2000);
+				AreaItem thirdAreaItem = new AreaItem(
+						ReconitionManager.centerX - 3,
+						ReconitionManager.centerY,
+						gridArrayList.get(gridArrayList.size() - 1), 2000);
+				int similarAmount = 0;
+				if (BitmapOperator.colorSimilar(firstAreaItem.getColor(),
+						secondAreaItem.getColor(), 2000)) {
+					similarAmount++;
+				}
+				if (BitmapOperator.colorSimilar(secondAreaItem.getColor(),
+						thirdAreaItem.getColor(), 2000)) {
+					similarAmount++;
+				}
+				Log.e("capthre", ""+"cap"+similarAmount);
 
-					if (BitmapOperator
-							.colorSimilar(nowAreaItem.getColor(),
-									lastAreaItem.getColor(),
-									BitmapOperator.colorRadius)) {
-
-						if ((Math.abs(nowAreaItem.getLeftBorder()
-								- lastAreaItem.getLeftBorder()) < maxMovingFootFrame
-								&& Math.abs(nowAreaItem.getRightBorder()
-										- lastAreaItem.getRightBorder()) < maxMovingFootFrame
-								&& Math.abs(nowAreaItem.getTopBorder()
-										- lastAreaItem.getTopBorder()) < maxMovingFootFrame && Math
-								.abs(nowAreaItem.getBottomBorder()
-										- lastAreaItem.getBottomBorder()) < maxMovingFootFrame)) {
-
-							similarAreaItems.add(new AreaItem[] { nowAreaItem,
-									lastAreaItem });
-
-						}
-
-					}
-
+				if (similarAmount > 1) {
+					captureColor(firstAreaItem);
 				}
 			}
-
-			//
-			removeStillObject(lastFrameAreaItems);
-			MyView.nowAreaItems = movingObjectList;
-
+			still = false;
 		}
 
 	}
 
-	public void removeStillObject(ArrayList<AreaItem> lastFrameAreaItems) {
-		for (int i = 0; i < similarAreaItems.size(); i++) {
-			AreaItem nowSimilarAreaItem = similarAreaItems.get(i)[0];
-			AreaItem lastAreaItem = similarAreaItems.get(i)[1];
-			double similar = nowSimilarAreaItem.similarity(lastAreaItem);
-			if (similar > 0.5) {
-				similarAreaItems.set(i, null);
-			}
-			if (nowSimilarAreaItem.getFillPercent() < 0.5
-					|| nowSimilarAreaItem.getAreaSize() < 20) {
-				similarAreaItems.set(i, null);
-			}
+	private double detectGrid(int x, int y, ArrayList<AreaItem> areaItems) {
+		AreaItem nowAreaItem = new AreaItem(x, y,
+				gridArrayList.get(gridArrayList.size() - 1), 2000);
+		areaItems.add(nowAreaItem);
+		if (areaItems.size() > sampleFrame) {
+			// whether center is still
+			int stillAmount = 0;
 
-			if (Math.abs(nowSimilarAreaItem.getXMax() - lastAreaItem.getXMax()) < minMovingFootFrame
-					&& Math.abs(nowSimilarAreaItem.getYMax()
-							- lastAreaItem.getYMax()) < minMovingFootFrame) {
-				similarAreaItems.set(i, null);
-			}
+			for (int i = areaItems.size() - 1; i > 1; i--) {
 
-//			if(!newBorn(nowSimilarAreaItem)){
-//				similarAreaItems.set(i, null);
-//			}
-		}
-		// Log.e("similar", "" + similarAreaItems.size());
-
-		for (int x = 0; x < similarAreaItems.size(); x++) {
-			if (similarAreaItems.get(x) != null) {
-				movingObjectList.add(similarAreaItems.get(x)[0]);
-
-			}
-		}
-
-	}
-
-	private boolean newBorn(AreaItem areaItem) {
-		if(lastGridColor==null){
-			return true;
-		}
-		
-		int difference = 0;
-		for (int i = areaItem.getLeftBorder(); i <= areaItem.getRightBorder(); i++) {
-			for (int j = areaItem.getTopBorder(); j <= areaItem
-					.getBottomBorder(); j++) {
-				if (!BitmapOperator.colorSimilar(areaItem.getColor(),
-						lastGridColor[i][j], BitmapOperator.colorRadius)) {
-					difference++;
+				if (BitmapOperator.colorSimilar(areaItems.get(i).getColor(),
+						areaItems.get(i - 1).getColor(), 3000)) {
+					stillAmount++;
 				}
 			}
+			double stillPercent = ((double) (stillAmount / (double) (areaItems
+					.size())));
+			return stillPercent;
+
 		}
+		return 0;
+	}
 
-		double difPercent = (double)difference / (double)areaItem.getAreaSize();
+	private void captureColor(AreaItem areaItem) {
+		Log.e("log", "fuck"+areaItem.getFillPercent()+"|"+areaItem.getAreaSize());
+//		if (areaItem.getFillPercent() > 0.4 && areaItem.getAreaSize() > 20) {
 
-		return difPercent >= 0.6;
+			captuerColorList.add(new long[] { areaItem.getColor() ,System.currentTimeMillis()});
+
+//		}
+
+	}
+
+	private void whenStill() {
+		still = true;
+		// Log.e("log", "still");
+
 	}
 
 }
