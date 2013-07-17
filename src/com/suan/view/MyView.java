@@ -11,12 +11,13 @@ import android.hardware.Camera.Area;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
-import com.suan.util.AreaItem;
-import com.suan.util.BitmapOperator;
-import com.suan.util.ReconitionManager;
+import com.suan.util.camera.AreaItem;
+import com.suan.util.camera.BitmapOperator;
+import com.suan.util.camera.ReconitionManager;
 
 @SuppressLint("HandlerLeak")
 public class MyView extends View {
@@ -96,67 +97,60 @@ public class MyView extends View {
 		paint.setStyle(Paint.Style.STROKE);
 		paint.setStrokeWidth(3);
 
+//		Log.e("center", ReconitionManager.centerAreaItem + "");
+//		if (ReconitionManager.centerAreaItem != null) {
+//			try {
+//
+//				for (int x = 0; x < BitmapOperator.xAmount; x++) {
+//
+//					for (int y = 0; y < BitmapOperator.yAmount; y++) {
+//						if (ReconitionManager.centerAreaItem.contain(x, y)) {
+//							int color = ReconitionManager.centerAreaItem
+//									.getColor();
+//							paint.setColor(color);
+//							canvas.drawRect(x * xWidth, y * yWidth, x * xWidth
+//									+ xWidth, y * yWidth + yWidth, paint);
+//
+//						}
+//
+//					}
+//
+//				}
+//
+//			} catch (Exception exception) {
+//				Log.e("nowitemerror", "" + exception);
+//
+//			}
+//		}
+//		Log.e("nowitem", "" + nowAreaItems);
+
 		if (nowAreaItems != null) {
 			try {
 				for (int i = 0; i < nowAreaItems.size(); i++) {
 					AreaItem nowAreaItem = nowAreaItems.get(i);
 
-					for (int j = 0; j < nowAreaItem.blockArrayList.size(); j++) {
-						int x = nowAreaItem.blockArrayList.get(j)[0];
-						int y = nowAreaItem.blockArrayList.get(j)[1];
-						int color = nowAreaItem.blockArrayList.get(j)[2];
-						paint.setColor(color);
-						canvas.drawRect(x * xWidth, y * yWidth, x * xWidth
-								+ xWidth, y * yWidth + yWidth, paint);
+					for (int x = 0; x < BitmapOperator.xAmount; x++) {
+
+						for (int y = 0; y < BitmapOperator.yAmount; y++) {
+							if (nowAreaItem.contain(x, y)) {
+								int color = nowAreaItem.getColor();
+								paint.setColor(color);
+								canvas.drawRect(x * xWidth, y * yWidth, x
+										* xWidth + xWidth, y * yWidth + yWidth,
+										paint);
+
+							}
+
+						}
 
 					}
 
 				}
 
 			} catch (Exception exception) {
+				Log.e("nowitemerror", "" + exception);
 
 			}
-		}
-
-		if (ReconitionManager.centerAreaItem != null) {
-			for (int i = 0; i < ReconitionManager.centerAreaItem.blockArrayList
-					.size(); i++) {
-				try {
-
-					int x = ReconitionManager.centerAreaItem.blockArrayList
-							.get(i)[0];
-					int y = ReconitionManager.centerAreaItem.blockArrayList
-							.get(i)[1];
-					int color = ReconitionManager.centerAreaItem.blockArrayList
-							.get(i)[2];
-					paint.setColor(color);
-					canvas.drawRect(x * xWidth, y * yWidth,
-							x * xWidth + xWidth, y * yWidth + yWidth, paint);
-					paint.setTextSize(45);
-					paint.setColor(Color.BLACK);
-					canvas.drawText(
-							ReconitionManager.centerAreaItem.getAreaSize()
-									+ "|"
-									+ Color.alpha(ReconitionManager.centerAreaItem
-											.getColor())
-
-									+ "|"
-									+ Color.red(ReconitionManager.centerAreaItem
-											.getColor())
-									+ "|"
-									+ Color.green(ReconitionManager.centerAreaItem
-											.getColor())
-									+ "|"
-									+ Color.blue(ReconitionManager.centerAreaItem
-											.getColor()),
-							ReconitionManager.centerX * xWidth,
-							ReconitionManager.centerY * yWidth, paint);
-
-				} catch (Exception exception) {
-
-				}
-			}
-
 		}
 
 	}

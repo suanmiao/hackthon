@@ -19,8 +19,8 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.suan.util.BitmapOperator;
-import com.suan.util.PreviewBitmapCallBack;
+import com.suan.util.camera.BitmapOperator;
+import com.suan.util.camera.PreviewBitmapCallBack;
 
 /**
  * This class assumes the parent layout is RelativeLayout.LayoutParams.
