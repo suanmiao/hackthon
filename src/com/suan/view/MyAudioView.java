@@ -89,13 +89,19 @@ public class MyAudioView extends View {
 		float maxHeight = 500;
 		float xLength = (float) (20);
 //		Log.e("xlength", xLength+"");
+//		for (int i = 0; i < 50; i++) {
+//			Rect nowRect = new Rect((int) (i * xLength),
+//					(int) (maxHeight * (1-(RecordThread.record[i][1]-34000) / 5000.0)),
+//					(int) (i * xLength + xLength), (int) maxHeight);
+//			canvas.drawRect(nowRect, paint);
+//		}
+
 		for (int i = 0; i < 50; i++) {
 			Rect nowRect = new Rect((int) (i * xLength),
-					(int) (maxHeight * (1-(RecordThread.record[i][1]-34000) / 5000.0)),
+					(int) (maxHeight * (1-(RecordThread.record[i][1]) / 50.0)),
 					(int) (i * xLength + xLength), (int) maxHeight);
 			canvas.drawRect(nowRect, paint);
 		}
-
 	}
 
 }

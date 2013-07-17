@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 public class RecordThread extends Thread {
 	private AudioRecord ar;
@@ -16,6 +17,7 @@ public class RecordThread extends Thread {
 	private static int recordLength = 50;
 	private long lastRecordTime = 0;
 	public static int footStep = 50;
+	FFT fft;
 
 	@SuppressWarnings("deprecation")
 	public RecordThread() {
@@ -25,61 +27,62 @@ public class RecordThread extends Thread {
 		bs = AudioRecord.getMinBufferSize(SAMPLE_RATE_IN_HZ,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT);
+
+		bs = 1024*2;
+
 		ar = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE_IN_HZ,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT, bs);
-
+		fft = new FFT(512*2, ar.getSampleRate());
+		Log.e("bs", bs + "");
 	}
 
 	public void run() {
 		super.run();
+		// boolean a = true;
+		// if(a){
+		// return;
+		// }
+
 		ar.startRecording();
 		// 用于读取的 buffer
 		byte[] buffer = new byte[bs];
 		while (isRun) {
 			int r = ar.read(buffer, 0, bs);
-			int v = 0;
 			// 将 buffer 内容取出，进行平方和运算
-			for (int i = 0; i < buffer.length; i++) {
-				// 这里没有做运算的优化，为了更加清晰的展示代码
-				v += buffer[i] * buffer[i];
+			float[] micBufferData = new float[512*2];
+			final int bytesPerSample = 2; // As it is 16bit PCM
+			final double amplification = 100.0; // choose a number as you like
+			for (int index = 0, floatIndex = 0; index < r - bytesPerSample + 1; index += bytesPerSample, floatIndex++) {
+				float sample = 0;
+				for (int b = 0; b < bytesPerSample; b++) {
+					int v = buffer[index + b];
+					if (b < bytesPerSample - 1 || bytesPerSample == 1) {
+						v &= 0xFF;
+					}
+					sample += v << (b * 8);
+				}
+				float sample32 = (float) (amplification * (sample / 32768.0));
+				micBufferData[floatIndex] = sample32;
 			}
-			// value 的 值 控制 为 0 到 100 之间 0为最小 》= 100为最大！！
-			int value = (int) (Math.abs((int) (v / (float) r) / 10000) >> 1);
-			// Log.d("111", "v = " + v);
-			// 平方和除以数据总长度，得到音量大小。可以获取白噪声值，然后对实际采样进行标准化。
-			// 如果想利用这个数值进行操作，建议用 sendMessage 将其抛出，在 Handler 里进行处理。
-			// Log.d("222", String.valueOf(v / (float) r));
 
-			double dB = 10 * Math.log10(v / (double) r);
-			// Log.d("333", "dB = " + dB);
-
+			fft.forward(micBufferData);
 			if (System.currentTimeMillis() - lastRecordTime > footStep) {
-				record(dB);
+
+				for (int i = 0; i < recordLength; i++) {
+					if (i < recordLength) {
+						record[i][1] = (int) (micBufferData[10*2 * i]);
+
+					}
+				}
 				lastRecordTime = System.currentTimeMillis();
 			}
 		}
 
 		ar.stop();
 	}
-
-	public static float[] floatMe(short[] pcms) {
-		float[] floaters = new float[pcms.length];
-		for (int i = 0; i < pcms.length; i++) {
-			floaters[i] = pcms[i];
-		}
-		return floaters;
-	}
-
-	public static short[] shortMe(byte[] bytes) {
-		short[] out = new short[bytes.length / 2]; // will drop last byte if odd
-													// number
-		ByteBuffer bb = ByteBuffer.wrap(bytes);
-		for (int i = 0; i < out.length; i++) {
-			out[i] = bb.getShort();
-		}
-		return out;
-	}
+	
+	
 
 	public void record(double db) {
 		if (nowRecordLength < recordLength) {
